@@ -4,8 +4,8 @@
   --color-brand-orange: #ff5a0a;
   --color-brand-navy: #101820;
   --color-brand-gray: #d6d9dc;
-  --color-studio: #0a0e14;
-  --color-studio-mid: #121820;
+  --color-studio: #ebe1d4;
+  --color-studio-mid: #f3ebe1;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -19,8 +19,8 @@ body,
 
 body {
   font-family: var(--font-sans);
-  background: var(--color-studio);
-  color: #f4f6f8;
+  background: #ebe1d4;
+  color: #1a1a1a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;

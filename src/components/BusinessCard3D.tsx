@@ -171,12 +171,14 @@ export function BusinessCard3D({
       }
     }
 
+    // Hover slightly above the marble pedestal
+    const baseY = 0.22
     if (!reducedMotion && !state.isInteracting && !flipAnim.current.active) {
       floatPhase.current += delta
-      const floatY = Math.sin(floatPhase.current * 0.9) * 0.03
+      const floatY = baseY + Math.sin(floatPhase.current * 0.9) * 0.028
       group.position.y = THREE.MathUtils.lerp(group.position.y, floatY, 0.08)
     } else {
-      group.position.y = THREE.MathUtils.lerp(group.position.y, 0, 0.12)
+      group.position.y = THREE.MathUtils.lerp(group.position.y, baseY, 0.12)
     }
 
     frontNormal.set(0, 0, 1).applyQuaternion(group.quaternion)
@@ -189,7 +191,13 @@ export function BusinessCard3D({
   })
 
   return (
-    <group ref={groupRef} rotation={[0.1, -0.25, 0]} castShadow receiveShadow>
+    <group
+      ref={groupRef}
+      position={[0, 0.22, 0]}
+      rotation={[0.1, -0.25, 0]}
+      castShadow
+      receiveShadow
+    >
       <mesh castShadow receiveShadow material={edgeMat}>
         <boxGeometry args={[CARD_W - 0.002, CARD_H - 0.002, CARD_D]} />
       </mesh>

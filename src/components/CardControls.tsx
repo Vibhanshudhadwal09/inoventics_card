@@ -14,10 +14,10 @@ interface CardControlsProps {
 }
 
 const btnBase =
-  'inline-flex h-10 w-10 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5A0A]/70'
+  'inline-flex h-10 w-10 items-center justify-center rounded-full border shadow-md backdrop-blur-md transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5A0A]/70'
 
 const btnIdle =
-  'border-white/15 bg-[#0a0e14]/75 text-white/80 hover:border-white/25 hover:bg-white/10 hover:text-white'
+  'border-black/10 bg-white/75 text-[#2a2a2a] hover:border-black/20 hover:bg-white hover:text-black'
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -83,7 +83,7 @@ export function CardControls({ state, actions }: CardControlsProps) {
           className={[
             btnBase,
             state.autoRotate
-              ? 'border-[#FF5A0A]/70 bg-[#FF5A0A]/20 text-[#FF5A0A]'
+              ? 'border-[#FF5A0A]/60 bg-[#FF5A0A]/15 text-[#FF5A0A]'
               : btnIdle,
           ].join(' ')}
         >

@@ -6,12 +6,15 @@ import {
   useRef,
 } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { ContactShadows, Environment } from '@react-three/drei'
+import { Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { BusinessCard3D } from './BusinessCard3D'
+import { StudioEnvironment, StudioLights } from './StudioEnvironment'
 import { cardDragState } from '../lib/cardDrag'
 import type { CardControlActions, CardControlState, CardSide } from '../types'
 import { ZOOM_MAX, ZOOM_MIN } from '../types'
+
+const STUDIO_BG = '#ebe1d4'
 
 interface BusinessCardSceneProps {
   state: CardControlState
@@ -55,9 +58,9 @@ function FitCamera({
     const vFov = THREE.MathUtils.degToRad(cam.fov)
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
 
-    // Extra margin so load state feels zoomed out, not cropped
-    const marginW = portrait ? 1.85 : 1.55
-    const marginH = portrait ? 2.05 : 1.65
+    // Extra margin so pedestal + glow ring stay in frame
+    const marginW = portrait ? 1.95 : 1.65
+    const marginH = portrait ? 2.25 : 1.85
     const distW = (3.5 / 2 / Math.tan(hFov / 2)) * marginW
     const distH = (2 / 2 / Math.tan(vFov / 2)) * marginH
     const fittedDist = Math.min(
@@ -69,7 +72,7 @@ function FitCamera({
       fittedOnce.current = true
       targetDist.current = fittedDist
       onZoomChange(fittedDist)
-      cam.position.set(0, portrait ? 0.1 : 0.28, fittedDist)
+      cam.position.set(0, portrait ? 0.05 : 0.15, fittedDist)
       cam.up.set(0, 1, 0)
       cam.lookAt(0, 0, 0)
     } else {
@@ -312,30 +315,11 @@ function SceneContent({
       <FitCamera zoom={state.zoom} onZoomChange={onZoomChange} />
       <DragRotateBridge setInteracting={actions.setInteracting} />
 
-      <color attach="background" args={['#0a0e14']} />
-      <fog attach="fog" args={['#0a0e14', 14, 28]} />
+      <color attach="background" args={[STUDIO_BG]} />
+      <fog attach="fog" args={[STUDIO_BG, 10, 22]} />
 
-      <ambientLight intensity={0.5} />
-      <directionalLight
-        castShadow
-        position={[3.5, 5, 4]}
-        intensity={1.3}
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0002}
-      >
-        <orthographicCamera
-          attach="shadow-camera"
-          args={[-4, 4, 4, -4, 0.5, 20]}
-        />
-      </directionalLight>
-      <directionalLight position={[-3, 2, -2]} intensity={0.4} color="#9eb6ff" />
-      <spotLight
-        position={[0, 4, -3]}
-        angle={0.5}
-        penumbra={0.8}
-        intensity={0.45}
-        color="#FF5A0A"
-      />
+      <StudioLights />
+      <StudioEnvironment />
 
       <Suspense fallback={null}>
         <BusinessCard3D
@@ -343,36 +327,18 @@ function SceneContent({
           onSideChange={handleSideChange}
           reducedMotion={reducedMotion}
         />
-        <Environment preset="city" environmentIntensity={0.25} />
+        <Environment preset="warehouse" environmentIntensity={0.18} />
       </Suspense>
-
-      <ContactShadows
-        position={[0, -1.2, 0]}
-        opacity={0.35}
-        scale={10}
-        blur={2.6}
-        far={3.5}
-        color="#000000"
-      />
-
-      <mesh position={[0, 0.1, -2.8]}>
-        <circleGeometry args={[2.2, 48]} />
-        <meshBasicMaterial color="#FF5A0A" transparent opacity={0.05} />
-      </mesh>
-      <mesh position={[0, 0.1, -2.95]}>
-        <circleGeometry args={[3.6, 48]} />
-        <meshBasicMaterial color="#1a3048" transparent opacity={0.28} />
-      </mesh>
     </>
   )
 }
 
 function LoaderFallback() {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[#0a0e14]">
+    <div className="flex h-full w-full items-center justify-center bg-[#ebe1d4]">
       <div className="flex flex-col items-center gap-3">
-        <div className="h-9 w-9 animate-spin rounded-full border-2 border-white/15 border-t-[#FF5A0A]" />
-        <p className="text-xs tracking-wide text-white/45">Loading card…</p>
+        <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#c4b5a2]/40 border-t-[#FF5A0A]" />
+        <p className="text-xs tracking-wide text-[#6a5a48]/70">Loading card…</p>
       </div>
     </div>
   )
@@ -384,12 +350,12 @@ export function BusinessCardScene({
   onZoomChange,
 }: BusinessCardSceneProps) {
   return (
-    <div className="absolute inset-0 h-full w-full touch-none overflow-hidden bg-[#0a0e14]">
+    <div className="absolute inset-0 h-full w-full touch-none overflow-hidden bg-[#ebe1d4]">
       <Suspense fallback={<LoaderFallback />}>
         <Canvas
           shadows
           dpr={[1, 1.75]}
-          camera={{ position: [0, 0.25, 7.5], fov: 36, near: 0.1, far: 40 }}
+          camera={{ position: [0, 0.35, 7.8], fov: 34, near: 0.1, far: 40 }}
           gl={{
             antialias: true,
             alpha: false,
@@ -399,8 +365,8 @@ export function BusinessCardScene({
           style={{ touchAction: 'none' }}
           onCreated={({ gl }) => {
             gl.toneMapping = THREE.ACESFilmicToneMapping
-            gl.toneMappingExposure = 1.05
-            gl.setClearColor('#0a0e14')
+            gl.toneMappingExposure = 1.12
+            gl.setClearColor(STUDIO_BG)
           }}
         >
           <SceneContent
