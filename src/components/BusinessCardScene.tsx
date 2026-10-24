@@ -86,19 +86,75 @@ function FitCamera({
 
   useEffect(() => {
     const el = gl.domElement
+
+    const applyZoom = (next: number) => {
+      const clamped = THREE.MathUtils.clamp(next, ZOOM_MIN, ZOOM_MAX)
+      targetDist.current = clamped
+      onZoomChange(clamped)
+    }
+
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
       const step = e.deltaY > 0 ? 0.35 : -0.35
-      const next = THREE.MathUtils.clamp(
-        targetDist.current + step,
-        ZOOM_MIN,
-        ZOOM_MAX,
-      )
-      targetDist.current = next
-      onZoomChange(next)
+      applyZoom(targetDist.current + step)
     }
+
+    // Two-finger pinch zoom (mobile)
+    let pinchStartDist = 0
+    let pinchStartZoom = 0
+
+    const touchDistance = (touches: TouchList) => {
+      const a = touches[0]
+      const b = touches[1]
+      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        cardDragState.pinching = true
+        cardDragState.active = false
+        cardDragState.dx = 0
+        cardDragState.dy = 0
+        pinchStartDist = touchDistance(e.touches)
+        pinchStartZoom = targetDist.current
+      }
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 2 || pinchStartDist <= 0) return
+      e.preventDefault()
+      cardDragState.pinching = true
+      cardDragState.active = false
+      const current = touchDistance(e.touches)
+      if (current < 1) return
+      // Fingers apart → zoom in (smaller camera distance)
+      const ratio = pinchStartDist / current
+      applyZoom(pinchStartZoom * ratio)
+    }
+
+    const endPinch = () => {
+      pinchStartDist = 0
+      cardDragState.pinching = false
+    }
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) endPinch()
+    }
+
     el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    el.addEventListener('touchend', onTouchEnd)
+    el.addEventListener('touchcancel', onTouchEnd)
+
+    return () => {
+      el.removeEventListener('wheel', onWheel)
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove', onTouchMove)
+      el.removeEventListener('touchend', onTouchEnd)
+      el.removeEventListener('touchcancel', onTouchEnd)
+      cardDragState.pinching = false
+    }
   }, [gl, onZoomChange])
 
   useFrame(() => {
@@ -134,6 +190,7 @@ function DragRotateBridge({
 }) {
   const { gl } = useThree()
   const dragging = useRef(false)
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
   const last = useRef({ x: 0, y: 0 })
   const delta = useRef({ x: 0, y: 0 })
 
@@ -141,19 +198,38 @@ function DragRotateBridge({
     const el = gl.domElement
 
     const down = (e: PointerEvent) => {
-      dragging.current = true
-      setInteracting(true)
-      last.current = { x: e.clientX, y: e.clientY }
-      delta.current = { x: 0, y: 0 }
-      try {
-        el.setPointerCapture(e.pointerId)
-      } catch {
-        /* ignore */
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // One finger only — rotate. Two fingers are handled by pinch zoom.
+      if (pointers.current.size === 1 && !cardDragState.pinching) {
+        dragging.current = true
+        setInteracting(true)
+        last.current = { x: e.clientX, y: e.clientY }
+        delta.current = { x: 0, y: 0 }
+        try {
+          el.setPointerCapture(e.pointerId)
+        } catch {
+          /* ignore */
+        }
+      } else {
+        dragging.current = false
+        delta.current = { x: 0, y: 0 }
+        setInteracting(true)
       }
     }
 
     const move = (e: PointerEvent) => {
-      if (!dragging.current) return
+      if (!pointers.current.has(e.pointerId)) return
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (
+        !dragging.current ||
+        cardDragState.pinching ||
+        pointers.current.size !== 1
+      ) {
+        return
+      }
+
       const dx = e.clientX - last.current.x
       const dy = e.clientY - last.current.y
       last.current = { x: e.clientX, y: e.clientY }
@@ -162,13 +238,30 @@ function DragRotateBridge({
     }
 
     const up = (e: PointerEvent) => {
-      if (!dragging.current) return
-      dragging.current = false
-      setInteracting(false)
+      pointers.current.delete(e.pointerId)
       try {
         el.releasePointerCapture(e.pointerId)
       } catch {
         /* ignore */
+      }
+
+      if (pointers.current.size === 0) {
+        dragging.current = false
+        setInteracting(false)
+        return
+      }
+
+      // Resume single-finger rotate if one pointer remains after pinch
+      if (pointers.current.size === 1 && !cardDragState.pinching) {
+        const remaining = pointers.current.values().next().value
+        if (remaining) {
+          dragging.current = true
+          last.current = { x: remaining.x, y: remaining.y }
+          delta.current = { x: 0, y: 0 }
+        }
+      } else {
+        dragging.current = false
+        delta.current = { x: 0, y: 0 }
       }
     }
 
@@ -186,9 +279,13 @@ function DragRotateBridge({
   }, [gl, setInteracting])
 
   useFrame(() => {
-    cardDragState.active = dragging.current
-    cardDragState.dx = delta.current.x
-    cardDragState.dy = delta.current.y
+    const canDrag =
+      dragging.current &&
+      !cardDragState.pinching &&
+      pointers.current.size === 1
+    cardDragState.active = canDrag
+    cardDragState.dx = canDrag ? delta.current.x : 0
+    cardDragState.dy = canDrag ? delta.current.y : 0
     delta.current.x = 0
     delta.current.y = 0
   })

@@ -32,3 +32,13 @@ export const SERVICES = [
   'Cloud Solutions',
   'IT Consulting',
 ] as const
+
+export const CONTACT = {
+  company: 'Inoventics Private Limited',
+  phoneDisplay: '+91 8278985815',
+  phoneE164: '918278985815',
+  phoneTel: '+918278985815',
+  website: 'https://www.inoventics.com',
+  whatsappUrl: 'https://wa.me/918278985815',
+  telUrl: 'tel:+918278985815',
+} as const

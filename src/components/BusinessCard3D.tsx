@@ -128,7 +128,7 @@ export function BusinessCard3D({
     const group = groupRef.current
     if (!group) return
 
-    if (cardDragState.active) {
+    if (cardDragState.active && !cardDragState.pinching) {
       flipAnim.current.active = false
       const sensY = 0.0075
       const sensX = 0.0045
