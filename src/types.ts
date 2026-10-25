@@ -1,44 +1,51 @@
-export type CardSide = 'front' | 'back'
-
-export interface CardControlState {
-  autoRotate: boolean
-  zoom: number
-  side: CardSide
-  isInteracting: boolean
-  flipToken: number
-  resetToken: number
+export interface SocialLinks {
+  website: string
+  instagram: string
+  whatsapp: string
+  call: string
 }
 
-export interface CardControlActions {
-  flip: () => void
-  zoomIn: () => void
-  zoomOut: () => void
-  reset: () => void
-  toggleAutoRotate: () => void
-  setSide: (side: CardSide) => void
-  setInteracting: (value: boolean) => void
+export interface ServiceItem {
+  id: string
+  label: string
 }
 
-export const ZOOM_MIN = 3.6
-export const ZOOM_MAX = 11
-export const ZOOM_DEFAULT = 7.2
-export const ZOOM_STEP = 0.55
+export interface BusinessProfile {
+  logoDataUrl: string | null
+  businessName: string
+  tagline: string
+  phoneCountryCode: string
+  phoneNumber: string
+  website: string
+  socials: SocialLinks
+  servicesHeading: string
+  services: ServiceItem[]
+  footerSlogan: string
+}
 
-export const SERVICES = [
-  'Web Development',
-  'Mobile App Development',
-  'DevOps',
-  'Custom Software Solutions',
-  'Cloud Solutions',
-  'IT Consulting',
-] as const
-
-export const CONTACT = {
-  company: 'Inoventics Private Limited',
-  phoneDisplay: '+91 8278985815',
-  phoneE164: '918278985815',
-  phoneTel: '+918278985815',
+export const DEFAULT_PROFILE: BusinessProfile = {
+  logoDataUrl: null,
+  businessName: 'Inoventics Private Limited',
+  tagline: 'Innovate • Build • Transform',
+  phoneCountryCode: '+91',
+  phoneNumber: '8278985815',
   website: 'https://www.inoventics.com',
-  whatsappUrl: 'https://wa.me/918278985815',
-  telUrl: 'tel:+918278985815',
-} as const
+  socials: {
+    website: 'https://www.inoventics.com',
+    instagram: 'https://instagram.com/inoventics',
+    whatsapp: 'https://wa.me/918278985815',
+    call: 'tel:+918278985815',
+  },
+  servicesHeading: 'Our Services',
+  services: [
+    { id: '1', label: 'Web Development' },
+    { id: '2', label: 'Mobile App Development' },
+    { id: '3', label: 'DevOps' },
+    { id: '4', label: 'Custom Software Solutions' },
+    { id: '5', label: 'Cloud Solutions' },
+    { id: '6', label: 'IT Consulting' },
+  ],
+  footerSlogan: "Let's Build Something Great Together",
+}
+
+export const STORAGE_KEY = 'inoventics-business-profile'
