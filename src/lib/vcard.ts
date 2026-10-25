@@ -9,7 +9,8 @@ export function downloadVCard(profile: BusinessProfile) {
     'BEGIN:VCARD',
     'VERSION:3.0',
     `FN:${profile.businessName}`,
-    `ORG:${profile.businessName}`,
+    // Work Info on phone contacts uses ORG — custom field, not company name
+    profile.workInfo ? `ORG:${profile.workInfo}` : '',
     `TEL;TYPE=CELL,VOICE:${phone}`,
     profile.website ? `URL:${profile.website}` : '',
     profile.tagline ? `NOTE:${profile.tagline}` : '',

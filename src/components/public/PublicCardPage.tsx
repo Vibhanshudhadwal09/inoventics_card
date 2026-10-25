@@ -118,11 +118,50 @@ export function PublicCardPage({ profile }: PublicCardPageProps) {
         <button
           type="button"
           onClick={() => downloadVCard(profile)}
-          className="mb-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF5A0A] px-4 py-4 text-sm font-bold text-white shadow-[0_10px_28px_-10px_rgba(255,90,10,0.75)] transition hover:bg-[#e84f08] active:scale-[0.99] sm:text-base"
+          className="mb-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF5A0A] px-4 py-4 text-sm font-bold text-white shadow-[0_10px_28px_-10px_rgba(255,90,10,0.75)] transition hover:bg-[#e84f08] active:scale-[0.99] sm:text-base"
         >
           <UserRoundPlus className="h-5 w-5" aria-hidden />
           Save Contact
         </button>
+
+        <section className="mb-6 rounded-3xl border border-black/5 bg-white p-5 shadow-[0_8px_30px_-18px_rgba(0,0,0,0.2)] sm:p-6">
+          <div className="space-y-4">
+            <div>
+              <p className="text-[11px] font-semibold tracking-wide text-[#8a8a8a] uppercase">
+                Work Info
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[#101820] sm:text-[15px]">
+                {profile.workInfo || '—'}
+              </p>
+            </div>
+            {(profile.website || profile.socials.website) && (
+              <div>
+                <p className="text-[11px] font-semibold tracking-wide text-[#8a8a8a] uppercase">
+                  Website
+                </p>
+                <a
+                  href={profile.socials.website || profile.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-2 text-sm font-medium text-[#FF5A0A] hover:underline sm:text-[15px]"
+                >
+                  <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {profile.website || profile.socials.website}
+                </a>
+              </div>
+            )}
+            {profile.tagline && (
+              <div>
+                <p className="text-[11px] font-semibold tracking-wide text-[#8a8a8a] uppercase">
+                  Notes
+                </p>
+                <p className="mt-1 text-sm text-[#444] sm:text-[15px]">
+                  {profile.tagline}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
 
         <section className="mb-8 rounded-3xl border border-black/5 bg-white p-5 shadow-[0_8px_30px_-18px_rgba(0,0,0,0.2)] sm:p-6">
           <h2 className="mb-4 text-sm font-bold tracking-wide text-[#101820] sm:text-base">

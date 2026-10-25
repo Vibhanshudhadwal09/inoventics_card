@@ -136,7 +136,20 @@ export function AdminPanel({ api }: AdminPanelProps) {
             />
           </div>
           <div>
-            <FieldLabel>Tagline</FieldLabel>
+            <FieldLabel>Work Info</FieldLabel>
+            <input
+              className={inputClass}
+              value={profile.workInfo}
+              onChange={(e) => update('workInfo', e.target.value)}
+              placeholder="e.g. Software Development Company"
+            />
+            <p className="mt-1.5 text-[11px] text-[#8a8a8a]">
+              Shown under Work Info on the public page and in saved phone
+              contacts (instead of the business name).
+            </p>
+          </div>
+          <div>
+            <FieldLabel>Tagline / Notes</FieldLabel>
             <input
               className={inputClass}
               value={profile.tagline}

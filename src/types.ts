@@ -13,6 +13,8 @@ export interface ServiceItem {
 export interface BusinessProfile {
   logoDataUrl: string | null
   businessName: string
+  /** Custom Work Info (shown on public page + phone contact ORG field) */
+  workInfo: string
   tagline: string
   phoneCountryCode: string
   phoneNumber: string
@@ -26,6 +28,7 @@ export interface BusinessProfile {
 export const DEFAULT_PROFILE: BusinessProfile = {
   logoDataUrl: null,
   businessName: 'Inoventics Private Limited',
+  workInfo: 'Software Development Company',
   tagline: 'Innovate • Build • Transform',
   phoneCountryCode: '+91',
   phoneNumber: '8278985815',
